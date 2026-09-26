@@ -1,116 +1,131 @@
 import 'package:flutter/material.dart';
-
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/message.dart';
 
-/// Page de chat privé et local entre les deux partenaires.
 class ChatPage extends StatefulWidget {
-  const ChatPage({
-    super.key,
-    required this.currentUserId,
-    this.messages = const [],
-  });
-
-  final String currentUserId;
-  final List<Message> messages;
+  const ChatPage({Key? key}) : super(key: key);
 
   @override
   State<ChatPage> createState() => _ChatPageState();
 }
 
 class _ChatPageState extends State<ChatPage> {
-  final _controller = TextEditingController();
-  late List<Message> _messages;
+  bool senderIsHim = true;
+  final TextEditingController _controller = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-    _messages = List.of(widget.messages);
-  }
-
-  void _send() {
-    final text = _controller.text.trim();
-    if (text.isEmpty) return;
-    setState(() {
-      _messages.add(Message(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        senderId: widget.currentUserId,
-        content: text,
-        sentAt: DateTime.now(),
-      ));
-      _controller.clear();
-    });
-    // TODO: ChatRepository.sendMessage(...)
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+  final List<Message> messages = [
+    Message(text: 'Bonjour mon amour 🌸', time: '09:12', isMe: false),
+    Message(text: 'Bonjour ma chérie, tu as bien dormi ? 💕', time: '09:15', isMe: true),
+    Message(text: 'Oui ! J\'ai rêvé de toi encore haha ✨', time: '09:16', isMe: false),
+    Message(text: 'Comme toutes les nuits pour moi 💖', time: '09:18', isMe: true),
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Notre Chat')),
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: AppColors.primary),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Column(
+          children: [
+            Text('Conversation', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text('Notre fil de messages privés', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
+          ],
+        ),
+      ),
       body: Column(
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: _messages.length,
+              padding: const EdgeInsets.all(20),
+              itemCount: messages.length,
               itemBuilder: (context, index) {
-                final message = _messages[index];
-                final isMine = message.senderId == widget.currentUserId;
+                final msg = messages[index];
                 return Align(
-                  alignment: isMine
-                      ? Alignment.centerRight
-                      : Alignment.centerLeft,
+                  alignment: msg.isMe ? Alignment.centerRight : Alignment.centerLeft,
                   child: Container(
-                    margin: const EdgeInsets.symmetric(vertical: 4),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 10,
-                    ),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isMine
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                      color: msg.isMe ? AppColors.primary : Colors.white,
                       borderRadius: BorderRadius.circular(16),
                     ),
-                    child: Text(
-                      message.content,
-                      style: TextStyle(
-                        color: isMine
-                            ? Theme.of(context).colorScheme.onPrimary
-                            : null,
-                      ),
+                    child: Column(
+                      crossAlignment: msg.isMe ? CrossAlignment.end : CrossAlignment.start,
+                      children: [
+                        Text(
+                          msg.text,
+                          style: TextStyle(color: msg.isMe ? Colors.white : AppColors.textDark, fontSize: 14),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          msg.time,
+                          style: TextStyle(color: msg.isMe ? Colors.white70 : AppColors.textMuted, fontSize: 10),
+                        ),
+                      ],
                     ),
                   ),
                 );
               },
             ),
           ),
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(8),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _controller,
-                      decoration: const InputDecoration(
-                        hintText: 'Écris un message...',
-                        border: OutlineInputBorder(),
-                      ),
-                      onSubmitted: (_) => _send(),
+          Container(
+            padding: const EdgeInsets.all(12),
+            color: Colors.white,
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    ChoiceChip(
+                      label: const Text('Lui'),
+                      selected: senderIsHim,
+                      selectedColor: AppColors.primaryLight,
+                      onSelected: (val) => setState(() => senderIsHim = true),
                     ),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _send,
-                  ),
-                ],
-              ),
+                    const SizedBox(width: 8),
+                    ChoiceChip(
+                      label: const Text('Elle'),
+                      selected: !senderIsHim,
+                      selectedColor: AppColors.primaryLight,
+                      onSelected: (val) => setState(() => senderIsHim = false),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _controller,
+                        decoration: InputDecoration(
+                          hintText: 'Écris un message...',
+                          filled: true,
+                          fillColor: AppColors.background,
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(24), borderSide: BorderSide.none),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    CircleAvatar(
+                      backgroundColor: AppColors.primary,
+                      child: IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white, size: 18),
+                        onPressed: () {
+                          if (_controller.text.isNotEmpty) {
+                            setState(() {
+                              messages.add(Message(text: _controller.text, time: '09:20', isMe: senderIsHim));
+                              _controller.clear();
+                            });
+                          }
+                        },
+                      ),
+                    )
+                  ],
+                ),
+              ],
             ),
           ),
         ],

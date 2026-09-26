@@ -1,69 +1,65 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 
-/// Sous-page de sécurité : activer/désactiver un verrouillage par code
-/// pour protéger l'accès à l'application privée du couple.
-class SecuritySubpage extends StatefulWidget {
-  const SecuritySubpage({super.key, this.initialEnabled = false});
-
-  final bool initialEnabled;
-
-  @override
-  State<SecuritySubpage> createState() => _SecuritySubpageState();
-}
-
-class _SecuritySubpageState extends State<SecuritySubpage> {
-  late bool _lockEnabled;
-  final _pinController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _lockEnabled = widget.initialEnabled;
-  }
-
-  @override
-  void dispose() {
-    _pinController.dispose();
-    super.dispose();
-  }
+class SecuritySubpage extends StatelessWidget {
+  const SecuritySubpage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Sécurité')),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          SwitchListTile(
-            title: const Text('Verrouillage par code'),
-            subtitle: const Text(
-              "Demander un code à chaque ouverture de l'application",
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Sécurité', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textDark)),
+        const SizedBox(height: 20),
+        Card(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.card_giftcard, color: AppColors.primary),
+                    SizedBox(width: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Mot de passe Surprise', style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text('Changez le code secret pour accéder à la surprise', style: TextStyle(color: AppColors.textMuted, fontSize: 11)),
+                      ],
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: TextEditingController(text: '2026'),
+                  decoration: InputDecoration(
+                    labelText: 'NOUVEAU MOT DE PASSE',
+                    filled: true,
+                    fillColor: AppColors.background,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.lock, size: 16, color: AppColors.primary),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text('Partagez ce code uniquement avec votre partenaire', style: TextStyle(color: AppColors.primary, fontSize: 11)),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            value: _lockEnabled,
-            onChanged: (v) => setState(() => _lockEnabled = v),
           ),
-          if (_lockEnabled) ...[
-            const SizedBox(height: 16),
-            TextField(
-              controller: _pinController,
-              keyboardType: TextInputType.number,
-              obscureText: true,
-              maxLength: 6,
-              decoration: const InputDecoration(
-                labelText: 'Code à 4-6 chiffres',
-              ),
-            ),
-          ],
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: () {
-              // TODO: SettingsController.toggleAppLock + setAppLockPin
-              Navigator.pop(context);
-            },
-            child: const Text('Enregistrer'),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
